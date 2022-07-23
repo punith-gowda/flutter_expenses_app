@@ -4,11 +4,11 @@ import "package:intl/intl.dart";
 
 class TranscationList extends StatelessWidget {
   final List<Transcation> _userTranscations;
-  TranscationList(this._userTranscations);
+  final Function _deleteTx;
+  TranscationList(this._userTranscations, this._deleteTx);
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
       child: _userTranscations.isEmpty
           ? Column(
               children: [
@@ -56,22 +56,38 @@ class TranscationList extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          _userTranscations[index].title,
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 247, 185, 0),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
+                    Flexible(
+                      flex: 2,
+                      fit: FlexFit.tight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            _userTranscations[index].title,
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 247, 185, 0),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                          Text(
+                            DateFormat.yMMMd()
+                                .format(_userTranscations[index].date),
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Colors.red,
                         ),
-                        Text(
-                          DateFormat.yMMMd()
-                              .format(_userTranscations[index].date),
-                          style: TextStyle(color: Colors.grey[600]),
-                        )
-                      ],
+                        onPressed: () {
+                          _deleteTx(_userTranscations[index].id);
+                        },
+                      ),
                     )
                   ],
                 ));

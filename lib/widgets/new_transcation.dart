@@ -1,18 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class NewTranscation extends StatelessWidget {
+class NewTranscation extends StatefulWidget {
   final Function addTx;
-  final titleInputController = TextEditingController();
-  final amountInputController = TextEditingController();
+
   NewTranscation(this.addTx);
 
-  void submitData() {
+  @override
+  State<NewTranscation> createState() => _NewTranscationState();
+}
+
+class _NewTranscationState extends State<NewTranscation> {
+  final titleInputController = TextEditingController();
+  final amountInputController = TextEditingController();
+  DateTime _selectedDate;
+
+  void _submitData() {
     final enteredTitle = titleInputController.text;
     final enteredAmount = double.parse(amountInputController.text);
-    if (enteredTitle.isEmpty || enteredAmount <= 0) {
+    if (enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
       return;
     }
-    addTx(enteredTitle, enteredAmount);
+    widget.addTx(enteredTitle, enteredAmount, _selectedDate);
+  }
+
+  void _presentDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: _selectedDate == null ? DateTime.now() : _selectedDate,
+      firstDate: DateTime(2022),
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    });
   }
 
   @override
@@ -27,23 +52,46 @@ class NewTranscation extends StatelessWidget {
             TextField(
               controller: titleInputController,
               decoration: InputDecoration(labelText: 'Title'),
-              onSubmitted: (_) => submitData(),
+              onSubmitted: (_) => _submitData(),
             ),
             TextField(
               controller: amountInputController,
               decoration: InputDecoration(labelText: 'Amount'),
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              onSubmitted: (_) => submitData(),
+              onSubmitted: (_) => _submitData(),
+            ),
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(_selectedDate == null
+                      ? 'No Date Chosen!'
+                      : 'Picked Date: ${DateFormat.yMd().format(_selectedDate)}'),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: TextButton(
+                    child: Text(
+                      'Choose Date',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: _presentDatePicker,
+                  ),
+                ),
+              ],
             ),
             Container(
               margin: EdgeInsets.fromLTRB(0, 10, 0, 2),
-              child: TextButton(
+              child: ElevatedButton(
                   onPressed: () {
-                    submitData();
+                    _submitData();
                   },
-                  child: Text(
-                    '+ Add transcation',
-                    style: TextStyle(color: Colors.purple),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '+ Add transcation',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   )),
             )
           ],

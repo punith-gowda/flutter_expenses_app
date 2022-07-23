@@ -2,10 +2,17 @@ import 'package:expenses_app/widgets/chart.dart';
 import 'package:expenses_app/widgets/new_transcation.dart';
 import 'package:expenses_app/widgets/transcations_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'models/transcation.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -50,18 +57,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addNewTranscation(String _title, double _amount) {
+  void _addNewTranscation(String _title, double _amount, DateTime _date) {
     final newTx = Transcation(
         title: _title,
         amount: _amount,
-        date: DateTime.now(),
+        date: _date,
         id: DateTime.now().toString());
 
-    print("New Transcation: $newTx");
     setState(() {
       _userTranscations.add(newTx);
     });
     Navigator.of(context).pop();
+  }
+
+  void _deleteTranscation(String id) {
+    setState(() {
+      _userTranscations.removeWhere((tx) => tx.id == id);
+    });
   }
 
   void _startNewTranscation(BuildContext context) {
@@ -78,21 +90,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: Text('Personal Expenses'),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () => _startNewTranscation(context),
+            icon: Icon(Icons.add))
+      ],
+    );
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Personal Expenses'),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () => _startNewTranscation(context),
-              icon: Icon(Icons.add))
-        ],
-      ),
+      appBar: appBar,
       body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTranscations),
-            TranscationList(_userTranscations),
+            Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom) *
+                    0.32,
+                child: Chart(_recentTranscations)),
+            Container(
+              height: (MediaQuery.of(context).size.height -
+                      appBar.preferredSize.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom) *
+                  0.68,
+              child: TranscationList(_userTranscations, _deleteTranscation),
+            )
           ]),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
