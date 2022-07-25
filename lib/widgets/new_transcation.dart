@@ -45,7 +45,11 @@ class _NewTranscationState extends State<NewTranscation> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.only(
+            top: 10,
+            left: 10,
+            right: 10,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
